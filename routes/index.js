@@ -3,14 +3,15 @@ const express = require('express');
 const crypto = require('crypto');
 const axios = require('axios');
 const FormData = require('form-data');
+const common = require('./common');
+const config = require('./config');
 
 // Route and OAuth variables
 const router = express.Router();
-const clientId = 'd67e4208-6722-4783-9787-03c3ead5230d';
+const clientId = config.clientId;
 const clientSecret = 'CmW5LwOKNrqFNHfEF8O8gLhMXAHP4sz2Gm4PEm6baNA';
 const redirectURI = encodeURI('http://localhost:3000/oauth-callback');
 const scopes = encodeURIComponent('profile offline_access openid');
-const jwksUri = 'https://local.fusionauth.io/.well-known/jwks.json';
 
 // Crypto variables
 const password = 'setec-astronomy'
@@ -67,13 +68,11 @@ router.get('/oauth-callback', (req, res, next) => {
       // Parse and verify the ID token (it's a JWT and once verified we can just store the body)
       if (idToken) {
         let user = null;
-        parseJWT(idToken, nonce, (token) => { 
-          console.log("token");
-          console.log(token);
+        common.parseIdToken(idToken, nonce, (token) => { 
           user = token;
           if (!user) {
             console.log('Nonce is bad. It should be ' + nonce + ' but was ' + idToken.nonce);
-            res.redirect('/', 302); // Start over
+            res.redirect(302,"/"); // Start over
             return;
           }
         });
@@ -83,7 +82,7 @@ router.get('/oauth-callback', (req, res, next) => {
       // Since the different OAuth modes handle the tokens differently, we are going to
       // put a placeholder function here. We'll discuss this function in the following
       // sections
-      handleTokens(accessToken, idToken, refreshToken);
+      handleTokens(accessToken, idToken, refreshToken, res);
     });
 });
 
@@ -154,39 +153,19 @@ function restoreNonce(req, res) {
   return value;
 }
 
-function handleTokens(accessToken, idToken, refreshToken) {
-  console.log(accessToken);
-  console.log(idToken);
-  console.log(refreshToken);
-}
+function handleTokens(accessToken, idToken, refreshToken, res) {
+  //console.log(accessToken);
+  //console.log(idToken);
+  //console.log(refreshToken);
 
-const jwt = require('jsonwebtoken');
-const jwksClient = require('jwks-rsa');
-const client = jwksClient({
-  strictSsl: true, // Default value
-  jwksUri: jwksUri,
-  requestHeaders: {}, // Optional
-  requestAgentOptions: {}, // Optional
-  timeout: 30000, // Defaults to 30s
-});
+  // Write the tokens as cookies
+  res.cookie('access_token', accessToken, {httpOnly: true, secure: true});
+  res.cookie('id_token', idToken); // Not httpOnly or secure
+  res.cookie('refresh_token', refreshToken, {httpOnly: true, secure: true});
 
-function parseJWT(idToken, nonce, done) {
-  const parsedJWT = jwt.decode(idToken, {complete: true});
-  client.getSigningKey(parsedJWT.header.kid, (err, key) => {
-    if (err) {  
-      console.log("Key not found "+err);
-      done(null);
-    }
-    let signingKey = key.getPublicKey();
-    token = jwt.verify(idToken, signingKey);
+  // Redirect to the To-do list
+  res.redirect(302, '/todos');
 
-    if (nonce !== token.nonce) {
-      console.log("nonce doesn't match "+nonce +", "+token.nonce);
-      done(null);
-    }
-
-    done(token);
-  });
 }
 
 module.exports = router;
