@@ -6,10 +6,11 @@ const FormData = require('form-data');
 
 // Route and OAuth variables
 const router = express.Router();
-const clientId = '85a03867-dccf-4882-adde-1a79aeec50df';
-const clientSecret = '-dDwRVoGzizK5fi5ALMODbv43jZE0HnSLIbUpJR7bcw';
+const clientId = 'd67e4208-6722-4783-9787-03c3ead5230d';
+const clientSecret = 'CmW5LwOKNrqFNHfEF8O8gLhMXAHP4sz2Gm4PEm6baNA';
 const redirectURI = encodeURI('http://localhost:3000/oauth-callback');
 const scopes = encodeURIComponent('profile offline_access openid');
+const jwksUri = 'https://local.fusionauth.io/.well-known/jwks.json';
 
 // Crypto variables
 const password = 'setec-astronomy'
@@ -44,7 +45,7 @@ router.get('/oauth-callback', (req, res, next) => {
     res.redirect('/', 302); // Start over
     return;
   }
-
+  
   const code = req.query.code;
   const codeVerifier = restoreCodeVerifier(req, res);
   const nonce = restoreNonce(req, res);
@@ -65,13 +66,34 @@ router.get('/oauth-callback', (req, res, next) => {
 
       // Parse and verify the ID token (it's a JWT and once verified we can just store the body)
       if (idToken) {
-        const user = parseJWT(idToken, nonce);
-        if (!user) {
-          console.log('Nonce is bad. It should be ' + nonce + ' but was ' + idToken.nonce);
-          res.redirect('/', 302); // Start over
-          return;
-        }
+        let user = null;
+        parseJWT(idToken, nonce, (token) => { 
+          console.log("token");
+          console.log(token);
+          user = token;
+          if (!user) {
+            console.log('Nonce is bad. It should be ' + nonce + ' but was ' + idToken.nonce);
+            res.redirect('/', 302); // Start over
+            return;
+          }
+        });
+/*
+        console.log(result);
+        result.then(ok => { 
+        console.log("here3");
+        console.log(ok);
+          user = ok;
+          if (!user) {
+            console.log('Nonce is bad. It should be ' + nonce + ' but was ' + idToken.nonce);
+            res.redirect('/', 302); // Start over
+            return;
+          }
+        }).catch(err => {
+          console.error(err)
+        });
+*/
       }
+
 
       // Since the different OAuth modes handle the tokens differently, we are going to
       // put a placeholder function here. We'll discuss this function in the following
@@ -153,18 +175,50 @@ function handleTokens(accessToken, idToken, refreshToken) {
   console.log(refreshToken);
 }
 
-const jwks = require('jwks-client');
 const jwt = require('jsonwebtoken');
+const jwksClient = require('jwks-rsa');
 const client = jwksClient({
-                            cache: true,
-                            cacheMaxEntries: 5, // Default value
-                            cacheMaxAge: ms('10h'), // Default value
-                            jwksUri: 'https://jacokoster.nl/.well-known/jwks.json'
-                          });
-function parseJWT(idToken, nonce) {
-  const parsedJWT = jwt.parse(idToken);
-  const key = jwks.getKey(parsedJWT.header.kid);
-  jwt.verify(idToken, key);
+  strictSsl: true, // Default value
+  jwksUri: jwksUri,
+  requestHeaders: {}, // Optional
+  requestAgentOptions: {}, // Optional
+  timeout: 30000, // Defaults to 30s
+});
+
+function parseJWT(idToken, nonce, done) {
+  const parsedJWT = jwt.decode(idToken, {complete: true});
+  client.getSigningKey(parsedJWT.header.kid, (err, key) => {
+    if (err) {  
+      console.log("Key not found "+err);
+      done(null);
+    }
+    let signingKey = key.getPublicKey();
+    token = jwt.verify(idToken, signingKey);
+
+    if (nonce !== token.nonce) {
+      console.log("nonce doesn't match "+nonce +", "+token.nonce);
+      done(null);
+    }
+
+    done(token);
+  });
 }
+/*
+async function parseJWT(idToken, nonce) {
+  const parsedJWT = jwt.decode(idToken, {complete: true});
+  return new Promise((resolve, reject) => { 
+    client.getSigningKey(parsedJWT.header.kid, (err, signingKey) => {
+    if (err) {  
+      reject("Key not found "+err);
+    }
+    const key = signingKey.getPublicKey(); 
+    console.log("here, in get signing key");
+
+    token = jwt.verify(idToken, key);
+    resolve(token);
+    })
+  });
+}
+*/
 
 module.exports = router;
