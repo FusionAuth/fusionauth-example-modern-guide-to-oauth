@@ -77,21 +77,6 @@ router.get('/oauth-callback', (req, res, next) => {
             return;
           }
         });
-/*
-        console.log(result);
-        result.then(ok => { 
-        console.log("here3");
-        console.log(ok);
-          user = ok;
-          if (!user) {
-            console.log('Nonce is bad. It should be ' + nonce + ' but was ' + idToken.nonce);
-            res.redirect('/', 302); // Start over
-            return;
-          }
-        }).catch(err => {
-          console.error(err)
-        });
-*/
       }
 
 
@@ -203,22 +188,5 @@ function parseJWT(idToken, nonce, done) {
     done(token);
   });
 }
-/*
-async function parseJWT(idToken, nonce) {
-  const parsedJWT = jwt.decode(idToken, {complete: true});
-  return new Promise((resolve, reject) => { 
-    client.getSigningKey(parsedJWT.header.kid, (err, signingKey) => {
-    if (err) {  
-      reject("Key not found "+err);
-    }
-    const key = signingKey.getPublicKey(); 
-    console.log("here, in get signing key");
-
-    token = jwt.verify(idToken, key);
-    resolve(token);
-    })
-  });
-}
-*/
 
 module.exports = router;
