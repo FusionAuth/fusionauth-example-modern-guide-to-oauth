@@ -6,6 +6,7 @@ const path = require('path');
 const logger = require('morgan');
 
 const indexRouter = require('./routes/index');
+const todosRouter = require('./routes/todos');
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(expressSession({resave: false, saveUninitialized: false, secret: 'setec-
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
+app.use('/todos', todosRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
