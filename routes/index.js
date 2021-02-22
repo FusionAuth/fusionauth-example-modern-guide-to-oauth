@@ -9,7 +9,7 @@ const config = require('./config');
 // Route and OAuth variables
 const router = express.Router();
 const clientId = config.clientId;
-const clientSecret = 'CmW5LwOKNrqFNHfEF8O8gLhMXAHP4sz2Gm4PEm6baNA';
+const clientSecret = config.clientSecret;
 const redirectURI = encodeURI('http://localhost:3000/oauth-callback');
 const scopes = encodeURIComponent('profile offline_access openid');
 
@@ -20,6 +20,14 @@ const iv = crypto.randomBytes(16);
 
 router.get('/', (req, res, next) => {
   res.render('index', {title: 'FusionAuth Example'});
+});
+
+router.get('/logout', (req, res, next) => {
+  removeTokens(res);
+  req.session.destroy();
+
+  // end FusionAuth session
+  res.redirect(`https://local.fusionauth.io/oauth2/logout?client_id=${config.clientId}`);
 });
 
 router.get('/login', (req, res, next) => {
@@ -68,14 +76,15 @@ router.get('/oauth-callback', (req, res, next) => {
       // Parse and verify the ID token (it's a JWT and once verified we can just store the body)
       if (idToken) {
         let user = null;
-        common.parseIdToken(idToken, nonce, (token) => { 
+        common.parseJWT(idToken, refreshToken, (token) => { 
           user = token;
           if (!user) {
             console.log('Nonce is bad. It should be ' + nonce + ' but was ' + idToken.nonce);
             res.redirect(302,"/"); // Start over
             return;
           }
-        });
+        }, nonce);
+        // TODO store user object in localstorage?
       }
 
 
@@ -83,7 +92,7 @@ router.get('/oauth-callback', (req, res, next) => {
       // put a placeholder function here. We'll discuss this function in the following
       // sections
       handleTokens(accessToken, idToken, refreshToken, res);
-    });
+    }).catch((err) => {console.log("in error"); console.error(JSON.stringify(err));});
 });
 
 // Helper method for Base 64 encoding that is URL safe
@@ -166,6 +175,13 @@ function handleTokens(accessToken, idToken, refreshToken, res) {
   // Redirect to the To-do list
   res.redirect(302, '/todos');
 
+}
+
+function removeTokens(res) {
+  // remove the token cookies
+  res.cookie('access_token', null, {httpOnly: true, secure: true});
+  res.cookie('id_token', null); 
+  res.cookie('refresh_token', null, {httpOnly: true, secure: true});
 }
 
 module.exports = router;
