@@ -13,7 +13,7 @@ getTodos = () => {
 
 router.get('/', (req, res, next) => {
   todos = getTodos();
-  res.render('index', {title: 'Todos', todos: todos});
+  res.render('todos', {title: 'Todos', todos: todos});
 });
 
 router.get('/api', (req, res, next) => {

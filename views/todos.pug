@@ -3,9 +3,11 @@ extends layout
 
 block content
   h1= title
-  if user
-    p Hello #{user.given_name}
-  else
-    a(href='http://localhost:3000/login') Login
-
-  p Welcome to #{title}
+  table
+    tr
+      th Task
+      th Complete
+    each val in todos
+      tr
+        td #{val.task}
+        td #{val.done}
