@@ -75,15 +75,12 @@ router.get('/oauth-callback', (req, res, next) => {
 
       // Parse and verify the ID token (it's a JWT and once verified we can just store the body)
       if (idToken) {
-        let user = null;
-        common.parseJWT(idToken, refreshToken, (token) => { 
-          user = token;
+        let user = common.parseJWT(idToken, nonce);
           if (!user) {
             console.log('Nonce is bad. It should be ' + nonce + ' but was ' + idToken.nonce);
             res.redirect(302,"/"); // Start over
             return;
           }
-        }, nonce);
         // TODO store user object in localstorage?
       }
 
@@ -92,7 +89,7 @@ router.get('/oauth-callback', (req, res, next) => {
       // put a placeholder function here. We'll discuss this function in the following
       // sections
       handleTokens(accessToken, idToken, refreshToken, res);
-    }).catch((err) => {console.log("in error"); console.error(JSON.stringify(err));});
+    }).catch((err) => {console.log("in error2"); console.error(JSON.stringify(err));});
 });
 
 // Helper method for Base 64 encoding that is URL safe
@@ -163,9 +160,6 @@ function restoreNonce(req, res) {
 }
 
 function handleTokens(accessToken, idToken, refreshToken, res) {
-  //console.log(accessToken);
-  //console.log(idToken);
-  //console.log(refreshToken);
 
   // Write the tokens as cookies
   res.cookie('access_token', accessToken, {httpOnly: true, secure: true});
