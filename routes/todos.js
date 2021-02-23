@@ -58,7 +58,13 @@ router.get('/', (req, res, next) => {
     }
     const todos = getTodos();
     const idToken = req.cookies.id_token;
-    user = common.parseJWT(idToken).then((user) => {
+    const accessToken = req.cookies.access_token;
+
+    // either parse the idToken and pull out the claims, or call the userinfo endpoint
+    //common.parseJWT(idToken) 
+    common.retrieveUser(accessToken)
+      .then((user) => {
+
       res.render('todos', {title: 'Todos', todos: todos, user: user});
     }).catch((err) => {
       console.log(err);

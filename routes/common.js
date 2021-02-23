@@ -79,5 +79,19 @@ helper.validateToken = async function (accessToken, clientId) {
   return false;
 }
 
+helper.retrieveUser = async function (accessToken) {
+  const response = await axios.get(config.authServerUrl + '/oauth2/userinfo', { headers: { 'Authorization' : 'Bearer ' + accessToken } });
+  try {
+    if (response.status === 200) {
+      return response.data;
+    }
+
+    return null;
+  } catch (err) {
+    console.log(err);
+  }
+  return null;
+}
+
 module.exports = helper;
 
