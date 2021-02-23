@@ -7,9 +7,10 @@ const config = require('./config');
 const router = express.Router();
 
 getTodos = () => {
+  // pull from the database
   todos = [];
   todos.push({'task': 'Get milk', 'done' : true});
-  todos.push({'task': 'Read OAuth book', 'done' : false});
+  todos.push({'task': 'Read OAuth guide', 'done' : false});
   return todos;
 }
 
