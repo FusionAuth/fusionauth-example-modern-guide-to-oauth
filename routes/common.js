@@ -6,7 +6,7 @@ const { promisify } = require('util');
 
 const helper = {};
 
-const jwksUri = 'https://local.fusionauth.io/.well-known/jwks.json';
+const jwksUri = config.authServerUrl+'/.well-known/jwks.json';
 
 const jwt = require('jsonwebtoken');
 const jwksClient = require('jwks-rsa');
@@ -46,7 +46,7 @@ helper.refreshJWTs = async (refreshToken) => {
   form.append('grant_type', 'refresh_token');
   form.append('refresh_token', refreshToken);
   const authValue = 'Basic ' + Buffer.from(config.clientId +":"+config.clientSecret).toString('base64');
-  const response = await axios.post('https://local.fusionauth.io/oauth2/token', form, { 
+  const response = await axios.post(config.authServerUrl+'/oauth2/token', form, { 
       headers: { 
          'Authorization' : authValue,
          ...form.getHeaders()
@@ -59,6 +59,24 @@ helper.refreshJWTs = async (refreshToken) => {
   refreshedTokens.idToken = idToken;
   return refreshedTokens;
 
+}
+
+helper.validateToken = async function (accessToken, clientId) {
+
+  const form = new FormData();
+  form.append('token', accessToken);
+  form.append('client_id', clientId); // FusionAuth requires this for authentication
+ 
+  try {
+    const response = await axios.post(config.authServerUrl+'/oauth2/introspect', form, { headers: form.getHeaders() });
+    if (response.status === 200) {
+      return response.data.active;
+    }
+  } catch (err) {
+    console.log(err);
+  }
+
+  return false;
 }
 
 module.exports = helper;

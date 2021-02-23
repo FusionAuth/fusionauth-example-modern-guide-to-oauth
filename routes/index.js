@@ -27,7 +27,15 @@ router.get('/logout', (req, res, next) => {
   req.session.destroy();
 
   // end FusionAuth session
-  res.redirect(`https://local.fusionauth.io/oauth2/logout?client_id=${config.clientId}`);
+  res.redirect(`${config.authServerUrl}/oauth2/logout?client_id=${config.clientId}`);
+});
+
+router.get('/tokencheck', async (req, res, next) => {
+  const accessToken = req.cookies.access_token;
+
+  const active = await common.validateToken(accessToken, config.clientId);
+
+  res.render('tokencheck', {title: 'FusionAuth Example', active: active});
 });
 
 router.get('/login', (req, res, next) => {
@@ -35,7 +43,7 @@ router.get('/login', (req, res, next) => {
   const codeChallenge = generateAndSaveCodeChallenge(req, res);
   const nonce = generateAndSaveNonce(req, res);
   res.redirect(302,
-               'https://local.fusionauth.io/oauth2/authorize?' +
+               config.authServerUrl + '/oauth2/authorize?' +
                  `client_id=${clientId}&` +
                  `redirect_uri=${redirectURI}&` +
                  `state=${state}&` +
@@ -67,7 +75,7 @@ router.get('/oauth-callback', (req, res, next) => {
   form.append('code_verifier', codeVerifier);
   form.append('grant_type', 'authorization_code');
   form.append('redirect_uri', redirectURI);
-  axios.post('https://local.fusionauth.io/oauth2/token', form, { headers: form.getHeaders() })
+  axios.post(config.authServerUrl+'/oauth2/token', form, { headers: form.getHeaders() })
     .then((response) => {
       const accessToken = response.data.access_token;
       const idToken = response.data.id_token;
