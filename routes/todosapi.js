@@ -21,4 +21,22 @@ router.get('/', (req, res, next) => {
   });
 });
 
+router.post('/complete/:id', (req, res, next) => {
+  common.authorizationCheck(req, res).then((authorized) => {
+    if (!authorized) {
+      res.sendStatus(403); 
+      return;
+    }
+
+    const idToUpdate = parseInt(req.params.id);
+    common.completeTodo(idToUpdate);
+
+    const todos = common.getTodos();
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(todos));
+  }).catch((err) => {
+    console.log(err);
+  });
+});
+
 module.exports = router;
