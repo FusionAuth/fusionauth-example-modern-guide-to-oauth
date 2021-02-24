@@ -93,17 +93,34 @@ common.retrieveUser = async function (accessToken) {
   return null;
 }
 
+common.todos = [];
+
+common.completeTodo = (id) => {
+  const todosToUpdate = common.getTodos();
+  todosToUpdate.forEach((oneTodo) => {
+    if (oneTodo.id === id) {
+      oneTodo.done = true;
+    }
+  });
+
+  common.todos = todosToUpdate;
+}
+
 common.getTodos = () => {
-  // pull from the database
-  todos = [];
-  todos.push({'task': 'Get milk', 'done' : true});
-  todos.push({'task': 'Read OAuth guide', 'done' : false});
-  return todos;
+  if (common.todos.length === 0) {
+    // pull from the database in real world
+    common.todos.push({'id': 1, 'task': 'Get milk', 'done' : true});
+    common.todos.push({'id': 2, 'task': 'Read OAuth guide', 'done' : false});
+  }
+  return common.todos;
 }
 
 common.authorizationCheck = async (req, res) => {
   const accessToken = req.cookies.access_token;
   const refreshToken = req.cookies.refresh_token;
+  if (!accessToken || !refreshToken) {
+    return false;
+  }
   try {
     let jwt = await common.parseJWT(accessToken);
     return true;
