@@ -174,6 +174,21 @@ function handleTokens(accessToken, idToken, refreshToken, res) {
   res.cookie('id_token', idToken); // Not httpOnly or secure
   res.cookie('refresh_token', refreshToken, {httpOnly: true, secure: true});
 
+
+  // Call the third-party API
+/* this is fake, but you could replace with a real one
+  axios.post('https://api.third-party-provider.com/profile/friends', form, { headers: { 'Authorization' : 'Bearer '+accessToken } })
+    .then((response) => { 
+      if (response.status == 200) {
+        const json = JSON.parse(response.data);
+        req.session.friends = json.friends;
+
+        // Optionally store the friends list in our database
+        storeFriends(req, json.friends);
+      }
+    });
+*/
+
   // Redirect to the To-do list
   res.redirect(302, '/todos');
 
