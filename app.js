@@ -7,6 +7,7 @@ const logger = require('morgan');
 
 const indexRouter = require('./routes/index');
 const todosRouter = require('./routes/todos');
+const todosApiRouter = require('./routes/todosapi');
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/todos', todosRouter);
+app.use('/api/todos', todosApiRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
