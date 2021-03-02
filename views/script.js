@@ -1,13 +1,57 @@
 axios.get('/api/todos')
   .then(function (response) {
-    console.log(response.data);
+    buildUI(response.data);
+    buildClickHandler();
   })
   .catch(function (error) {
-   
     // handle error
     console.log(error);
+    window.location.href="/";
   });
 
+function buildUI(data) {
+  const todos = data;
+  const id_token = Cookies.get('id_token');
+  var decoded = jwt_decode(id_token);
+  const email = decoded.email;
+  const title = 'Todo list';
+  var html = `
+    <h1>${title}</h1><p>Todos for ${email}</p>
+    <table>
+    <tr><th>Task</th><th>Complete</th></tr>
+  `;
+  todos.forEach(val => {
+    var checked = '';
+    if (val.done){ 
+      checked = 'checked'
+    }
+    html += `<tr><td>${val.task}</td><td><input type='checkbox' class='chk' ${checked} data-id='${val.id}'></td></tr>`;
+  });
+  html = html + `</table>`;
+
+  document.getElementById('content').innerHTML = html;
+}
+
+function buildClickHandler() {
+  document.addEventListener('click', function (event) {
+
+    // If the clicked element doesn't have the right selector, bail
+    if (!event.target.matches('.chk')) return;
+
+    // Log the clicked element in the console
+    const completed = event.target.checked
+    const id = event.target.dataset.id
+    if (completed) {
+      axios.post('/api/todos/complete/'+id, {})
+      .then(function (response) {
+        console.log(response);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    }
+  }, false);
+}
 
 const refreshJWTs = async (refreshToken) => {
   console.log("refreshing.");

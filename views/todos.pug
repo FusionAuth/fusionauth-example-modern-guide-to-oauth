@@ -4,19 +4,11 @@ extends layout
 block content
   a(href='http://localhost:3000/logout') Logout
 
-  h1= title
-
-  p Todos for #{user.email}
-
-  table
-    tr
-      th Task
-      th Complete
-    each val in todos
-      tr
-        td #{val.task}
-        td #{val.done}
+  #content
 
   script(src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js')
+  script(src='https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js')
+  script
+    include jwt-decode.js
   script
     include script.js
