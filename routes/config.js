@@ -1,7 +1,7 @@
 module.exports = {
-  clientId : 'd67e4208-6722-4783-9787-03c3ead5230d',
+  clientId : '8a087e21-ddc3-4773-b1a6-e7c69b479fd9',
   issuer : 'https://local.fusionauth.io',
-  clientSecret : 'CmW5LwOKNrqFNHfEF8O8gLhMXAHP4sz2Gm4PEm6baNA',
+  clientSecret : 'clUAQGFziyumKOWxhbc8uh28WiLd35hWIzXEnaEEbr4',
   authServerUrl : 'https://local.fusionauth.io',
 }
 

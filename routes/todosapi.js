@@ -2,6 +2,7 @@
 const express = require('express');
 const common = require('./common');
 const config = require('./config');
+const axios = require('axios');
 
 // Router & constants
 const router = express.Router();
@@ -30,6 +31,17 @@ router.post('/complete/:id', (req, res, next) => {
 
     const idToUpdate = parseInt(req.params.id);
     common.completeTodo(idToUpdate);
+
+    /*
+    const wuphTokens = {}
+    axios.post('https://api.wuphf.com/send', {}, { headers: { 
+          auth: { 'bearer': wuphfTokens.accessToken, 'refresh': wuphfTokens.refreshToken }
+        }
+      }).then((response) => {
+        // check for status, log if not 200
+      } 
+    );  
+    */
 
     const todos = common.getTodos();
     res.setHeader('Content-Type', 'application/json');
