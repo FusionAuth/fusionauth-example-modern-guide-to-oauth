@@ -30,6 +30,33 @@ router.get('/logout', (req, res, next) => {
   res.redirect(`${config.authServerUrl}/oauth2/logout?client_id=${config.clientId}`);
 });
 
+router.post('/refresh', async (req, res, next) => {
+  const refreshToken = req.cookies.refresh_token;
+  if (!refreshToken) {
+    res.sendStatus(403);
+    return;
+  }
+  try {
+    const refreshedTokens = await common.refreshJWTs(refreshToken);
+
+    const newAccessToken = refreshedTokens.accessToken;
+    const newIdToken = refreshedTokens.idToken;
+  
+    // update our cookies
+    console.log("updating our cookies");
+    res.cookie('access_token', newAccessToken, {httpOnly: true, secure: true});
+    res.cookie('id_token', newIdToken); // Not httpOnly or secure
+    res.sendStatus(200);
+    return;
+  } catch (error) {
+    console.log("unable to refresh");
+    res.sendStatus(403);
+    return;
+  }
+
+});
+
+
 router.get('/tokencheck', async (req, res, next) => {
   const accessToken = req.cookies.access_token;
 

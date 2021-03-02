@@ -1,13 +1,35 @@
+const buildAttemptRefresh = function(after) {
+   return (error) => {
+    console.log("trying to refresh");
+    // try to refresh if we got an error
+    // we can't send the cookie, so we need to request the refresh endpoint
+    axios.post('/refresh', {})
+    .then(function (response) { 
+      after();
+    })
+    .catch(function (error) {
+      console.log("unable to refresh tokens");
+      console.log(error);
+      //window.location.href="/";
+    });
+  };
+}
+
+const getTodos = function() {
 axios.get('/api/todos')
   .then(function (response) {
     buildUI(response.data);
     buildClickHandler();
   })
-  .catch(function (error) {
-    // handle error
-    console.log(error);
-    window.location.href="/";
-  });
+  .catch(console.log);
+}
+
+axios.get('/api/todos')
+  .then(function (response) {
+    buildUI(response.data);
+    buildClickHandler();
+  })
+  .catch(buildAttemptRefresh(getTodos));
 
 function buildUI(data) {
   const todos = data;
@@ -46,32 +68,14 @@ function buildClickHandler() {
       .then(function (response) {
         console.log(response);
       })
-      .catch(function (error) {
-        console.log(error);
-      });
+      .catch(buildAttemptRefresh(function() {
+        axios.post('/api/todos/complete/'+id, {})
+        .then(function (response) {
+          console.log(response);
+        })
+        .catch(console.log);
+      }));
     }
   }, false);
 }
 
-const refreshJWTs = async (refreshToken) => {
-  console.log("refreshing.");
-  // POST refresh request to Token endpoint
-  const form = new FormData();
-  form.append('client_id', config.clientId);
-  form.append('grant_type', 'refresh_token');
-  form.append('refresh_token', refreshToken);
-  const authValue = 'Basic ' + Buffer.from(config.clientId +":"+config.clientSecret).toString('base64');
-  const response = await axios.post(config.authServerUrl+'/oauth2/token', form, {
-      headers: {
-         'Authorization' : authValue,
-         ...form.getHeaders()
-      } });
-
-  const accessToken = response.data.access_token;
-  const idToken = response.data.id_token;
-  const refreshedTokens = {};
-  refreshedTokens.accessToken = accessToken;
-  refreshedTokens.idToken = idToken;
-  return refreshedTokens;
-
-}

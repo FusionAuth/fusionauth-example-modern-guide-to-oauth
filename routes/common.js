@@ -58,7 +58,6 @@ common.refreshJWTs = async (refreshToken) => {
   refreshedTokens.accessToken = accessToken;
   refreshedTokens.idToken = idToken;
   return refreshedTokens;
-
 }
 
 common.validateToken = async function (accessToken, clientId) {
@@ -125,7 +124,6 @@ common.getTodos = () => {
 }
 
 common.authorizationCheck = async (req, res) => {
-  return true;
   const accessToken = req.cookies.access_token;
   const refreshToken = req.cookies.refresh_token;
   if (!accessToken || !refreshToken) {
