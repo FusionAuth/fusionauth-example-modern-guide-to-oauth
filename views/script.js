@@ -10,7 +10,7 @@ const buildAttemptRefresh = function(after) {
     .catch(function (error) {
       console.log("unable to refresh tokens");
       console.log(error);
-      //window.location.href="/";
+      window.location.href="/";
     });
   };
 }
