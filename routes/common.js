@@ -125,10 +125,10 @@ common.getTodos = () => {
 
 common.authorizationCheck = async (req, res) => {
   const accessToken = req.cookies.access_token;
-  const refreshToken = req.cookies.refresh_token;
-  if (!accessToken || !refreshToken) {
+  if (!accessToken) {
     return false;
   }
+
   try {
     let jwt = await common.parseJWT(accessToken);
     return true;
