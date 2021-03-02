@@ -133,35 +133,7 @@ common.authorizationCheck = async (req, res) => {
     let jwt = await common.parseJWT(accessToken);
     return true;
   } catch (err) { 
-    console.log("err");
     console.log(err);
-/*
-    if (err.name === "TokenExpiredError") {
-      const refreshedTokens = await common.refreshJWTs(refreshToken);
-
-      const newAccessToken = refreshedTokens.accessToken;
-      const newIdToken = refreshedTokens.idToken;
-  
-      // update our cookies
-      console.log("updating our cookies");
-      res.cookie('access_token', newAccessToken, {httpOnly: true, secure: true});
-      res.cookie('id_token', newIdToken); // Not httpOnly or secure
-     
-      // subsequent parts of processing this request may pull from cookies, so if we refreshed, update them
-      req.cookies.access_token = newAccessToken;
-      req.cookies.id_token = newIdToken;
-
-      try {
-        let newJwt = await common.parseJWT(newAccessToken);
-        return true;
-      } catch (err2) {
-        console.log(err2);
-        return false;
-      }
-    } else {
-      console.log(err);
-    }
-*/
     return false;
   }
 }
