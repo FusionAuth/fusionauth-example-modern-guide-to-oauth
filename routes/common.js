@@ -60,7 +60,7 @@ common.refreshJWTs = async (refreshToken) => {
   return refreshedTokens;
 }
 
-common.validateToken = async function (accessToken, clientId) {
+common.validateToken = async function (accessToken, clientId, expectedAud, expectedIss) {
 
   const form = new FormData();
   form.append('token', accessToken);
@@ -69,7 +69,11 @@ common.validateToken = async function (accessToken, clientId) {
   try {
     const response = await axios.post(config.authServerUrl+'/oauth2/introspect', form, { headers: form.getHeaders() });
     if (response.status === 200) {
-      return response.data.active;
+      const data = response.data;
+      if (expectedAud === data.aud && expectedIss == data.iss) {
+        return data.active;
+      } 
+      return false;
     }
   } catch (err) {
     console.log(err);

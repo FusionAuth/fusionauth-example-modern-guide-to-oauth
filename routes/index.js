@@ -60,7 +60,7 @@ router.post('/refresh', async (req, res, next) => {
 router.get('/tokencheck', async (req, res, next) => {
   const accessToken = req.cookies.access_token;
 
-  const active = await common.validateToken(accessToken, config.clientId);
+  const active = await common.validateToken(accessToken, config.clientId, config.clientId, config.issuer);
 
   res.render('tokencheck', {title: 'FusionAuth Example', active: active});
 });
