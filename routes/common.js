@@ -70,10 +70,10 @@ common.validateToken = async function (accessToken, clientId, expectedAud, expec
     const response = await axios.post(config.authServerUrl+'/oauth2/introspect', form, { headers: form.getHeaders() });
     if (response.status === 200) {
       const data = response.data;
-      if (expectedAud === data.aud && expectedIss == data.iss) {
-        return data.active;
-      } 
-      return false;
+      if (!data.active) {
+        return false; // if not active, we don't get any other claims
+      }
+      return expectedAud === data.aud && expectedIss === data.iss;
     }
   } catch (err) {
     console.log(err);
