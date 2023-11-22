@@ -1,7 +1,7 @@
 module.exports = {
-  clientId : '8a087e21-ddc3-4773-b1a6-e7c69b479fd9',
-  issuer : 'https://local.fusionauth.io',
-  clientSecret : 'clUAQGFziyumKOWxhbc8uh28WiLd35hWIzXEnaEEbr4',
-  authServerUrl : 'https://local.fusionauth.io',
+  clientId : 'e9fdb985-9173-4e01-9d73-ac2d60d1dc8e',
+  issuer : 'http://localhost:9011',
+  clientSecret : 'super-secret-secret-that-should-be-regenerated-for-production',
+  authServerUrl : 'http://localhost:9011',
 }
 
