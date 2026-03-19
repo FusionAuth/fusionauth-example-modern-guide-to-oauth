@@ -59,6 +59,7 @@ services:
       SEARCH_SERVERS: http://search:9200
       SEARCH_TYPE: elasticsearch
       FUSIONAUTH_APP_KICKSTART_FILE: ${FUSIONAUTH_APP_KICKSTART_FILE}
+      FUSIONAUTH_APP_INSTALLATION_SOURCE: fusionauth-example-modern-guide-to-oauth
 
     networks:
       - db_net
